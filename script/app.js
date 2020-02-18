@@ -136,6 +136,12 @@ function mouseClick(e) {
         if (!comp.checkLifePlayer()) {
             alert("Компьютер повержен. Ура!!!");
             whoseTurn = 0;
+            mouseLinkStart = 0;
+            readyStart = 0;
+            user = new Player(name,0);
+            comp = new Player('comp',0);
+            userBoard = new GameBoard(user);
+            compBoard = new GameBoard(comp);
             return true;
         }
         if (s == 0) {
@@ -173,6 +179,12 @@ function compStep() {
     if (!user.checkLifePlayer()) {
         alert("Вы проиграли. Конец!!!");
         whoseTurn = 0;
+        mouseLinkStart = 0;
+        readyStart = 0;
+        user = new Player(name,0);
+        comp = new Player('comp',0);
+        userBoard = new GameBoard(user);
+        compBoard = new GameBoard(comp);
         return true;
     }
     if (s != 0) {
@@ -326,18 +338,24 @@ function Draw() {
 
     this.drawShip = function (ships, step) {
         // drawShip рисует корабли на поле
-        if (step != 1) {
-            // если растановка кораблей или ходит комп
+
             for (i = 0; i < 10; i++) {
                 var area = ships[i].getAreaShip();
                 var col1 = area[0] * CELL_SIZE + X_BOARD;
                 var row1 =  area[1] * CELL_SIZE + Y_BOARD;
                 var col2 = area[2] * CELL_SIZE + X_BOARD + CELL_SIZE - col1;
                 var row2 =  area[3] * CELL_SIZE + Y_BOARD + CELL_SIZE - row1;
-                this.ctx.fillStyle = '#0f00b4';
-                this.ctx.fillRect(col1, row1, col2, row2);
+                if (step != 1) {
+                    this.ctx.fillStyle = '#4988b4';
+                    this.ctx.fillRect(col1, row1, col2, row2);
+                } else {
+                    if (ships[i].getStatus() === 0 ) {
+                        this.ctx.fillStyle = '#4988b4';
+                        this.ctx.fillRect(col1, row1, col2, row2);
+                    }
+                }
             }
-        }
+
     }; // end drawShip
 
     this.drawShotResult = function (board, step) {
@@ -509,6 +527,7 @@ function GameBoard(player) {
                                     break;
                                 }
                             }
+                            if (shift > 10) { break; }
                         }while (true);
                         return [arr[1],arr[0]];
                     } else {
@@ -532,12 +551,21 @@ function GameBoard(player) {
                                     break;
                                 }
                             }
+                            if (shift > 10) { break; }
                         }while (true);
                         return [arr[1],arr[0]];
                     }
                 } // конец ветки с несколькими подбитыми палубами
             } // end if !== -1
         }
+        do {
+            arr = [rand(9),rand(9)];
+            if ((this.cells.cell[arr[0]][arr[1]] !== STATCELL.MISS) &&
+                (this.cells.cell[arr[0]][arr[1]] !== STATCELL.DECK_DEAD)){
+                break;
+            }
+        } while (true);
+        return [arr[1],arr[0]];
     }; // end getCellForShot
 
 } // end GameBoard
